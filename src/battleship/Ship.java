@@ -1,29 +1,33 @@
+package battleship;
 public class Ship {
+    private int shipid;
     private int length;
     private boolean isHorizontal;
     private int x;
     private int y;
+    private int life;
     private boolean sunk;
+    private boolean placed;
 
-    public Ship(int l){
+    public Ship(int id, int l) {
+        this.shipid = id;
         this.length = l; //2,3,4,5
         this.isHorizontal = true;
         this.x = -1; //range 0-9, -1 means unplaced
         this.y = -1; //range 0-9, -1 means unplaced
+        this.life = l;
         this.sunk = false;
+        this.placed = false;
+    }
+
+    public int getShipid() {
+        return shipid;
     }
 
     public void changeOrientation(){
         isHorizontal = !isHorizontal;
     }
-    public boolean isValidPos(){
-        if(isHorizontal){
-            return x + length <= 10;
-        }
-        else { //isVertical
-            return y + length <= 10;
-        }
-    }
+
     public int getLength() {
         return length;
     }
@@ -38,6 +42,11 @@ public class Ship {
 
     public void setHorizontal(boolean horizontal) {
         isHorizontal = horizontal;
+    }
+
+    public void setPos(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
     public int getX() {
@@ -62,5 +71,22 @@ public class Ship {
 
     public void setSunk(boolean sunk) {
         this.sunk = sunk;
+    }
+
+    public boolean isPlaced() {
+        return placed;
+    }
+
+    public void setPlaced(boolean placed) {
+        this.placed = placed;
+    }
+
+    public int getLife() {
+        return life;
+    }
+    public void takeHit() {
+        if (--life == 0) {
+            setSunk(true);
+        }
     }
 }
