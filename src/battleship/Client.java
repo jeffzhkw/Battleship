@@ -1,6 +1,7 @@
 package battleship;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.net.Socket;
 
 public class Client extends JFrame implements Runnable{
@@ -32,7 +33,14 @@ public class Client extends JFrame implements Runnable{
     }
 
     private void handleConnectServer(){
+        System.out.println("Play clicked");
+        try{
+            socket = new Socket("localhost", 1216);
 
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
     }
     @Override
     public void run() {

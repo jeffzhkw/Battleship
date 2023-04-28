@@ -13,8 +13,10 @@ public class Server extends JFrame implements Runnable{
     private static int HEIGHT = 300;
     private JTextArea console = null;
 
-    Socket p1 = null;
-    Socket p2 = null;
+    private HandlePlayer player1 = null;
+    private HandlePlayer player2 = null;
+
+    private GameLogic game;
 
     public Server(){
         super("Game Server");
@@ -44,10 +46,17 @@ public class Server extends JFrame implements Runnable{
         try{
             ServerSocket serverSocket = new ServerSocket(1216);
             console.append("Server started at port 1216 at " + new Date() + "\n");
-            while((p1 == null || p2 == null)){
-                console.append("Waiting connections...");
+            while((player1 == null || player2 == null)) {
+                console.append("Waiting connections...\n");
                 Socket socket = serverSocket.accept();
+                if (player1 == null) { //The first connection would always be player1;
+                    player1 = new HandlePlayer(socket, 1);
+                } else if (player1 != null && player2 == null) {
+                    player2 = new HandlePlayer(socket, 2);
+                }
             }
+            System.out.println("Both Player Connected.");
+            //Enters game init.
         }
         catch(IOException e){
             System.err.println(e);
@@ -55,10 +64,19 @@ public class Server extends JFrame implements Runnable{
     }
 
     class HandlePlayer implements Runnable{
-
+        private Socket socket;
+        private int id;
+        public HandlePlayer(Socket s, int id){
+            this.socket = s;
+            this.id = id;
+            console.append("Player" + this.id + "Connected.\n");
+        }
         @Override
         public void run() {
+            //Constantly listen to client's action.
+            while(true){
 
+            }
         }
     }
     public static void main(String[] args){
