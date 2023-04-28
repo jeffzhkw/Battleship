@@ -13,7 +13,7 @@ public class Grid {
         for (int i = 0; i < 10; i ++) {
             //init to empty board
             for (int j = 0; j < 10; j ++) {
-                state[i][j] = new Cell();
+                state[i][j] = new Cell();// init to status =0, shipid = -1
             }
         }
     }
@@ -46,6 +46,7 @@ public class Grid {
             // offset on y
             for (; i < length && y + i < 10; i ++) {
                 if (state[x][y + i].getStatus() != 0) { // not ocean
+                    canPlaced = false;
                     break;
                 }
             }
@@ -54,6 +55,7 @@ public class Grid {
             // offset on x
             for (; i < length && x + i < 10; i ++) {
                 if (state[x + i][y].getStatus() != 0) { // not ocean
+                    canPlaced = false;
                     break;
                 }
             }
