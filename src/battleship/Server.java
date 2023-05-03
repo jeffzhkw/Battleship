@@ -21,6 +21,7 @@ public class Server extends JFrame implements Runnable{
     public Server(){
         super("Game Server");
         initGUI();
+        this.game = new GameLogic();
         new Thread(this).start();
     }
 
@@ -57,6 +58,7 @@ public class Server extends JFrame implements Runnable{
             }
             System.out.println("Both Player Connected.");
             //Enters game init.
+            game.initGame();
         }
         catch(IOException e){
             System.err.println(e);

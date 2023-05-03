@@ -7,17 +7,18 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class Client extends JFrame implements Runnable{
-    //GUIs
-    private static int WIDTH = 1370;
-    private static int HEIGHT = 768;
     private Socket socket = null;
+    //GUIs
+    private static int WIDTH = 1440;
+    private static int HEIGHT = 800;
     private JPanel selfBoard;
     private JPanel oppoBoard;
     private JPanel mainPanel;
     private JPanel west;
     private JPanel east;
     private JPanel center;
-    private JPanel south;
+    private JPanel placeControl;
+    private JPanel attackControl;
     private JScrollPane status;
     //Hold reference of BoardCells to change color
     private ArrayList<BoardCell> selfBoardCells = new ArrayList<BoardCell>();
@@ -25,8 +26,7 @@ public class Client extends JFrame implements Runnable{
     public Client(){
         super("Battleship");
         initGUI();
-        //getContentPane().repaint();
-
+        getContentPane().repaint();
     }
 
     private void initGUI(){
@@ -47,16 +47,14 @@ public class Client extends JFrame implements Runnable{
         west = new JPanel();
         east = new JPanel();
         center = new JPanel();
-        center.setLayout(new BorderLayout());
-        south = new JPanel();
-        south.setLayout(new BorderLayout());
+        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+        initControl();
         initBothBoard();
         initStatus();
-        initControl();
+
         mainPanel.add(west, BorderLayout.WEST);
         mainPanel.add(east, BorderLayout.EAST);
         mainPanel.add(center, BorderLayout.CENTER);
-        mainPanel.add(south,BorderLayout.SOUTH);
         this.add(mainPanel);
 
         //general setting
@@ -65,12 +63,20 @@ public class Client extends JFrame implements Runnable{
         this.setVisible(true);
     }
     private void initBothBoard(){
+        JPanel selfWrapper = new JPanel();
+        selfWrapper.setLayout(new BoxLayout(selfWrapper, BoxLayout.Y_AXIS));
+
         selfBoard = new JPanel();
         selfBoard.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        selfWrapper.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         selfBoard.setLayout(new GridLayout(11, 11, 0,0 ));
+
+        JPanel oppoWrapper = new JPanel();
+        oppoWrapper.setLayout(new BoxLayout(oppoWrapper, BoxLayout.Y_AXIS));
 
         oppoBoard = new JPanel();
         oppoBoard.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        oppoWrapper.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         oppoBoard.setLayout(new GridLayout(11, 11,0,0));
 
         for (int i = 0; i < 121; i++) {
@@ -97,61 +103,63 @@ public class Client extends JFrame implements Runnable{
                 oppoBoard.add(tempOppoCell);
             }
         }
-        west.add(selfBoard);
-        east.add(oppoBoard);
-    }
 
+        selfWrapper.add(new JLabel("Your Board"));
+        selfWrapper.add(selfBoard);
+        selfWrapper.add(placeControl);
+        oppoWrapper.add(new JLabel("Opponent Board"));
+        oppoWrapper.add(oppoBoard);
+        oppoWrapper.add(attackControl);
+        west.add(selfWrapper);
+        east.add(oppoWrapper);
+    }
     private void initStatus(){
         status = new JScrollPane(new JTextArea());
-        center.add(status, BorderLayout.CENTER);
+        //status.setMaximumSize(new Dimension(250, 580));
+        center.add(status);
         center.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-
     }
-
     private void initControl(){
-        JPanel placeControl = new JPanel();
+        placeControl = new JPanel();
         JPanel placeCoord = new JPanel();
-
         placeControl.setLayout(new BorderLayout());
-        placeControl.add(new JLabel("Your Board"), BorderLayout.NORTH);
 
         placeCoord.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 0));
         JPanel placeX = new JPanel();
-        placeX.add(new JLabel("Place at Row"));
-        placeX.add(new JTextField());
+        placeX.setLayout(new BorderLayout());
+        placeX.add(new JLabel("Place at Row"), BorderLayout.NORTH);
+        placeX.add(new JTextField(),BorderLayout.SOUTH);
         JPanel placeY = new JPanel();
-        placeY.add(new JLabel("Place at Column"));
-        placeY.add(new JTextField());
+        placeY.setLayout(new BorderLayout());
+        placeY.add(new JLabel("Place at Column"), BorderLayout.NORTH);
+        placeY.add(new JTextField(),BorderLayout.SOUTH);
         placeCoord.add(placeX);
         placeCoord.add(placeY);
-        placeControl.add(placeCoord, BorderLayout.CENTER);
+        placeCoord.add(new JCheckBox("is Horizontal?"));
+        placeControl.add(placeCoord, BorderLayout.NORTH);
 
         JButton placeBtn = new JButton("Place");
         placeControl.add(placeBtn, BorderLayout.SOUTH);
 
         //---------------------------------------
-        JPanel attackControl = new JPanel();
+        attackControl = new JPanel();
         JPanel attackCoord = new JPanel();
-
         attackControl.setLayout(new BorderLayout());
-        attackControl.add(new JLabel("Opponent Board"), BorderLayout.NORTH);
-
         attackCoord.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 0));
         JPanel attackX = new JPanel();
-        attackX.add(new JLabel("Attack at Row"));
-        attackX.add(new JTextField());
+        attackX.setLayout(new BorderLayout());
+        attackX.add(new JLabel("Attack at Row"),BorderLayout.NORTH);
+        attackX.add(new JTextField(),BorderLayout.SOUTH);
         JPanel attackY = new JPanel();
-        attackY.add(new JLabel("Attack at Column"));
-        attackY.add(new JTextField());
+        attackY.setLayout(new BorderLayout());
+        attackY.add(new JLabel("Attack at Column"),BorderLayout.NORTH);
+        attackY.add(new JTextField(),BorderLayout.SOUTH);
         attackCoord.add(attackX);
         attackCoord.add(attackY);
         attackControl.add(attackCoord, BorderLayout.CENTER);
 
         JButton attackBtn = new JButton("Attack");
         attackControl.add(attackBtn, BorderLayout.SOUTH);
-
-        south.add(placeControl, BorderLayout.WEST);
-        south.add(attackControl, BorderLayout.EAST);
     }
     private void updateSelfBoard(){
         selfBoard.repaint();
@@ -163,13 +171,16 @@ public class Client extends JFrame implements Runnable{
 
     private void handleConnectServer(){
         System.out.println("Play clicked");
+        selfBoardCells.get(15).setColor(-1);
         try{
             socket = new Socket("localhost", 1216);
         }
         catch(IOException e){
             e.printStackTrace();
         }
+        //status.append("Server connected");
     }
+
     @Override
     public void run() {
 
