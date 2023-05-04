@@ -22,6 +22,7 @@ public class Server extends JFrame implements Runnable{
         super("Game Server");
         initGUI();
         this.game = new GameLogic();
+        game.initGame();
         new Thread(this).start();
     }
 

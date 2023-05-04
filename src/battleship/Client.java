@@ -30,6 +30,7 @@ public class Client extends JFrame implements Runnable{
     private ArrayList<BoardCell> oppoBoardCells = new ArrayList<BoardCell>();
 
     private Grid selfGrid = new Grid();
+    private Ship[] shipLst = new Ship[5];
     //private int[][] oppoData = new int[10][10];
     private int placedShipNum = -1;
     public Client(){
@@ -183,7 +184,7 @@ public class Client extends JFrame implements Runnable{
     }
     private void updateSelfBoard(){
         int i = 0;
-        for (int [] arr : selfGrid.getData()){
+        for (int [] arr : selfGrid.getAllStatus()){
             for (int val: arr){
                 selfBoardCells.get(i).setColor(val);
                 i++;
@@ -216,18 +217,23 @@ public class Client extends JFrame implements Runnable{
         if (placedShipNum == -1){ placedShipNum = 0;}
         if(placedShipNum == 0){
             status.append("~ Place your length 2 ship\n");
+            shipLst[placedShipNum] = new Ship(placedShipNum, 2);
         }
         else if(placedShipNum == 1){
             status.append("~ Place your first length 3 ship\n");
+            shipLst[placedShipNum] = new Ship(placedShipNum, 3);
         }
         else if(placedShipNum == 2){
             status.append("~ Place your second length 3 ship\n");
+            shipLst[placedShipNum] = new Ship(placedShipNum, 3);
         }
         else if(placedShipNum == 3){
             status.append("~ Place your length 4 ship\n");
+            shipLst[placedShipNum] = new Ship(placedShipNum, 4);
         }
         else if(placedShipNum == 4){
             status.append("~ Place your length 5 ship\n");
+            shipLst[placedShipNum] = new Ship(placedShipNum, 5);
         }
         else if(placedShipNum == 5){
             status.append("~ All Ship Placed, you may click Connect! \n");
@@ -242,19 +248,28 @@ public class Client extends JFrame implements Runnable{
             status.append("Please start placing ship by click Play in the menubar\n");
             return;
         }
-        int r = Integer.parseInt(placeRowValue.getText().trim());
-        int c = Integer.parseInt(placeColValue.getText().trim());
+        int r = Integer.parseInt(placeRowValue.getText().trim())-1;
+        int c = Integer.parseInt(placeColValue.getText().trim())-1;
         boolean isH = isHorizontal.isSelected();
         placeRowValue.setText("");
         placeColValue.setText("");
-        if (0< r && r < 11 && 0 < c && c < 11){
-            status.append("Placing ship at "+ r + " " + c + "\n");
-            //TODO: selfGrid.checkPos, Place ship; backfilling shipLst of player from Gird Data;
+        if (0< r && r < 11 && 0 < c && c < 11){ //check for correct
+            Ship temp = shipLst[placedShipNum];
+            temp.setHorizontal(isH);
+            temp.setX(r);
+            temp.setY(c);
+            status.append("Placing shipId "+placedShipNum+" at "+ r + " " + c + "\n");
+            if (!selfGrid.isValidPos(temp, r,c)) { //not valid Pos
+                status.append("Invalid Pos\n");
+                return;
+            }
+            selfGrid.setShip(temp, r, c);
             placedShipNum++;
+            updateSelfBoard();
             handleInitShipPlacement();
         }
         else{
-            status.append("Invalid Pos\n");
+            status.append("Invalid Input Range\n");
         }
     }
     private void handleOnAttack(){

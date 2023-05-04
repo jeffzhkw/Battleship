@@ -1,11 +1,5 @@
 package battleship;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import battleship.Cell;
-import battleship.Ship;
-
 public class Grid {
     private Cell[][] state = new Cell[10][10];
 
@@ -102,11 +96,11 @@ public class Grid {
         return 2;
     }
 
-    public int[][] getData(){
+    public int[][] getAllStatus(){
         int[][] result = new int[10][10];
         for (int i =0; i< 10; i++){
             for (int j = 0; j < 10; j++){
-                result[i][j] = this.state[i][j].getStatus();
+                result[i][j] = this.getStatus(i,j);
             }
         }
         return result;
