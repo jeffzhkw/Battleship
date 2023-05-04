@@ -22,7 +22,6 @@ public class Server extends JFrame implements Runnable{
         super("Game Server");
         initGUI();
         this.game = new GameLogic();
-        game.initGame();
         new Thread(this).start();
     }
 
@@ -76,7 +75,7 @@ public class Server extends JFrame implements Runnable{
         }
         @Override
         public void run() {
-            //Constantly listen to client's action.
+            //TODO: Constantly listen to client's action.
             while(true){
 
             }

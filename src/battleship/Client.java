@@ -3,11 +3,14 @@ package battleship;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class Client extends JFrame implements Runnable{
-    private Socket socket = null;
+
     //GUIs
     private static int WIDTH = 1440;
     private static int HEIGHT = 800;
@@ -33,6 +36,12 @@ public class Client extends JFrame implements Runnable{
     private Ship[] shipLst = new Ship[5];
     //private int[][] oppoData = new int[10][10];
     private int placedShipNum = -1;
+
+    //Networking
+    private Socket socket = null;
+    ObjectOutputStream objectOutputStream = null;
+    ObjectInputStream objectInputStream = null;
+
     public Client(){
         super("Battleship");
         initGUI();
@@ -40,7 +49,9 @@ public class Client extends JFrame implements Runnable{
         status.append("~ Welcome, start placing ships by click Play from menu bar\n" +
                 "~ Then, click Connect to play with others.\n");
     }
-
+    //------------GUIs------------//
+    //TODO:
+    // Attack GUI interaction.
     private void initGUI(){
         //create menu
         JMenuBar menuBar = new JMenuBar();
@@ -192,7 +203,6 @@ public class Client extends JFrame implements Runnable{
         }
         selfBoard.repaint();
     }
-
 //    private void updateOppoBoard(){
 //        int i = 0;
 //        for (int [] arr : oppoData){
@@ -203,42 +213,32 @@ public class Client extends JFrame implements Runnable{
 //        }
 //        oppoBoard.repaint();
 //    }
-    private void handleConnectServer(){
-        System.out.println("Connect clicked");
-        try{
-            socket = new Socket("localhost", 1216);
-        }
-        catch(IOException e){
-            e.printStackTrace();
-        }
-        status.append("Server connected");
-    }
     private void handleInitShipPlacement(){
-        if (placedShipNum == -1){ placedShipNum = 0;}
-        if(placedShipNum == 0){
-            status.append("~ Place your length 2 ship\n");
-            shipLst[placedShipNum] = new Ship(placedShipNum, 2);
-        }
-        else if(placedShipNum == 1){
-            status.append("~ Place your first length 3 ship\n");
-            shipLst[placedShipNum] = new Ship(placedShipNum, 3);
-        }
-        else if(placedShipNum == 2){
-            status.append("~ Place your second length 3 ship\n");
-            shipLst[placedShipNum] = new Ship(placedShipNum, 3);
-        }
-        else if(placedShipNum == 3){
-            status.append("~ Place your length 4 ship\n");
-            shipLst[placedShipNum] = new Ship(placedShipNum, 4);
-        }
-        else if(placedShipNum == 4){
-            status.append("~ Place your length 5 ship\n");
-            shipLst[placedShipNum] = new Ship(placedShipNum, 5);
-        }
-        else if(placedShipNum == 5){
-            status.append("~ All Ship Placed, you may click Connect! \n");
-        }
+    if (placedShipNum == -1){ placedShipNum = 0;}
+    if(placedShipNum == 0){
+        status.append("~ Place your length 2 ship\n");
+        shipLst[placedShipNum] = new Ship(placedShipNum, 2);
     }
+    else if(placedShipNum == 1){
+        status.append("~ Place your first length 3 ship\n");
+        shipLst[placedShipNum] = new Ship(placedShipNum, 3);
+    }
+    else if(placedShipNum == 2){
+        status.append("~ Place your second length 3 ship\n");
+        shipLst[placedShipNum] = new Ship(placedShipNum, 3);
+    }
+    else if(placedShipNum == 3){
+        status.append("~ Place your length 4 ship\n");
+        shipLst[placedShipNum] = new Ship(placedShipNum, 4);
+    }
+    else if(placedShipNum == 4){
+        status.append("~ Place your length 5 ship\n");
+        shipLst[placedShipNum] = new Ship(placedShipNum, 5);
+    }
+    else if(placedShipNum == 5){
+        status.append("~ All Ship Placed, you may click Connect! \n");
+    }
+}
     private void handleOnPlace(){
         if(placedShipNum == 5){
             status.append("All ships placed\n");
@@ -248,12 +248,20 @@ public class Client extends JFrame implements Runnable{
             status.append("Please start placing ship by click Play in the menubar\n");
             return;
         }
-        int r = Integer.parseInt(placeRowValue.getText().trim())-1;
-        int c = Integer.parseInt(placeColValue.getText().trim())-1;
-        boolean isH = isHorizontal.isSelected();
-        placeRowValue.setText("");
-        placeColValue.setText("");
-        if (0< r && r < 11 && 0 < c && c < 11){ //check for correct
+        int r = -1;
+        int c = -1;
+        boolean isH = isHorizontal.isSelected();;
+        try{
+            r= Integer.parseInt(placeRowValue.getText().trim())-1;
+            c = Integer.parseInt(placeColValue.getText().trim())-1;
+            placeRowValue.setText("");
+            placeColValue.setText("");
+        }
+        catch (Exception e){
+            status.append("Invalid Input\n");
+        }
+
+        if (0<= r && r < 10 && 0 <= c && c < 10){ //check for correct
             Ship temp = shipLst[placedShipNum];
             temp.setHorizontal(isH);
             temp.setX(r);
@@ -266,27 +274,55 @@ public class Client extends JFrame implements Runnable{
             selfGrid.setShip(temp, r, c);
             placedShipNum++;
             updateSelfBoard();
-            handleInitShipPlacement();
         }
         else{
             status.append("Invalid Input Range\n");
         }
+        handleInitShipPlacement();
     }
     private void handleOnAttack(){
         System.out.println("Attack clicked");
     }
+    //------------Networking------------//
+
+    private void handleConnectServer(){
+        //TODO: GameInit
+        System.out.println("Connect clicked");
+        try{
+            socket = new Socket("localhost", 1216);
+            status.append("Success: Server connected.\n");
+            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            objectInputStream = new ObjectInputStream(socket.getInputStream());
+
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            status.append("Failed: Server not connected. \n");
+            return;
+        }
+        try{
+            //TODO: pass local Grid and shipLst.
+            objectOutputStream.writeObject(selfGrid);
+
+        }
+        catch (IOException e){
+            status.append("Error\n");
+        }
+    }
 
     @Override
     public void run() {
+        while(true){
+            //TODO: constantly listening to server message;
 
+
+        }
     }
-
-    //TODO:
-    // GUI interaction.
 
     public static void main(String[] args){
         Client c = new Client(); // Threading start in constructor.
     }
+
 
 
 }
