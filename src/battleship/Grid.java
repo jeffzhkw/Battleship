@@ -100,6 +100,26 @@ public class Grid {
         state[x][y].setStatus(2);
         state[x][y].setShipid(-1);
         return 2;
-    }   
+    }
+
+    public int[][] getData(){
+        int[][] result = new int[10][10];
+        for (int i =0; i< 10; i++){
+            for (int j = 0; j < 10; j++){
+                result[i][j] = this.state[i][j].getStatus();
+            }
+        }
+        return result;
+    }
+
+    public int[][] getShipId(){
+        int[][] result = new int[10][10];
+        for (int i =0; i< 10; i++){
+            for (int j = 0; j < 10; j++){
+                result[i][j] = this.state[i][j].getShipid();
+            }
+        }
+        return result;
+    }
 
 }
