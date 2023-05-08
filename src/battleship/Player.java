@@ -11,6 +11,7 @@ public class Player {
     private Ship[] shipLst = new Ship[5];
     private int actionX;
     private int actionY;
+    private boolean ableToMove;
 
     public Player(int id) {
         this.id = id;
@@ -21,12 +22,12 @@ public class Player {
         }
         actionX = -1;
         actionY = -1;
+        ableToMove = false;
     }
 
     public int getId() {
         return id;
     }
-
     public int getLife() {
         return life;
     }
@@ -38,7 +39,24 @@ public class Player {
         System.out.println("oppo: \n");
         oppo.displayGrid();
     }
+    public boolean isAbleToMove(){return ableToMove;}
+    public void setAbleToMove(boolean isAbleToMove){this.ableToMove = isAbleToMove;}
 
+    public int getGridStatusAt(int x, int y){
+        return self.getStatus(x, y);
+    }
+
+    public Grid getSelfGrid(){
+        return self;
+    }
+
+    public void replaceShipLstWith(Ship[] sLst){
+        shipLst = sLst;
+    }
+
+    public Grid getOppoView(){
+        return oppo;
+    }
     public void setHorizontal(int shipid, boolean horizontal) {
         shipLst[shipid].setHorizontal(horizontal);
     }

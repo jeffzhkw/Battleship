@@ -5,7 +5,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -32,14 +31,13 @@ public class Client extends JFrame implements Runnable{
     private ArrayList<BoardCell> selfBoardCells = new ArrayList<BoardCell>();//Hold reference of BoardCells(GUI) to change color
     private ArrayList<BoardCell> oppoBoardCells = new ArrayList<BoardCell>();
     //Game Data
-    private Grid selfGrid = new Grid();
+    private Player player = new Player(-1);
     private Ship[] shipLst = new Ship[5];
-    private Grid oppoGrid = new Grid();
     private int placedShipNum = -1;
     //Networking
     private Socket socket = null;
-    ObjectOutputStream objectOutputStream = null;
-    ObjectInputStream objectInputStream = null;
+    private ObjectOutputStream objectOutputStream = null;
+    private ObjectInputStream objectInputStream = null;
 
     public Client(){
         super("Battleship");
@@ -194,7 +192,7 @@ public class Client extends JFrame implements Runnable{
     }
     private void updateSelfBoard(){
         int i = 0;
-        for (int [] arr : selfGrid.getAllStatus()){
+        for (int [] arr : player.getSelfGrid().getAllStatus()){
             for (int val: arr){
                 selfBoardCells.get(i).setColor(val);
                 i++;
@@ -202,16 +200,16 @@ public class Client extends JFrame implements Runnable{
         }
         selfBoard.repaint();
     }
-//    private void updateOppoBoard(){
-//        int i = 0;
-//        for (int [] arr : oppoData){
-//            for (int val: arr){
-//                oppoBoardCells.get(i).setColor(val);
-//                i++;
-//            }
-//        }
-//        oppoBoard.repaint();
-//    }
+    private void updateOppoBoard(){
+        int i = 0;
+        for (int [] arr : player.getOppoView().getAllStatus()){
+            for (int val: arr){
+                oppoBoardCells.get(i).setColor(val);
+                i++;
+            }
+        }
+       oppoBoard.repaint();
+    }
     private void handleInitShipPlacement(){
     if (placedShipNum == -1){ placedShipNum = 0;}
     placeBtn.setEnabled(true);
@@ -241,79 +239,139 @@ public class Client extends JFrame implements Runnable{
     }
 }
     private void handleOnPlace(){
-        int r = -1;
-        int c = -1;
+        int x = -1;
+        int y = -1;
         boolean isH = isHorizontal.isSelected();;
         try{
-            r= Integer.parseInt(placeRowValue.getText().trim())-1;
-            c = Integer.parseInt(placeColValue.getText().trim())-1;
+            x= Integer.parseInt(placeRowValue.getText().trim())-1;
+            y = Integer.parseInt(placeColValue.getText().trim())-1;
             placeRowValue.setText("");
             placeColValue.setText("");
         }
         catch (Exception e){
-            status.append("Invalid Input\n");
+            status.append("Invalid Input: please enter 1-10. \n");
+            return;
         }
+        //if not in range
+        if (x < 0 || x > 9 || y < 0 || y > 9){
+            status.append("Invalid Input Range.\n");
+            return;
+        }
+        Ship temp = shipLst[placedShipNum];
+        temp.setHorizontal(isH);
+        temp.setX(x);
+        temp.setY(y);
+        status.append("Placing shipId "+ temp.getShipid()+" at (" + (x+1) +", " +(y+1)+")...\n");
 
-        if (0<= r && r < 10 && 0 <= c && c < 10){ //check for correct
-            Ship temp = shipLst[placedShipNum];
-            temp.setHorizontal(isH);
-            temp.setX(r);
-            temp.setY(c);
-            status.append("Placing shipId "+placedShipNum+" at "+ r + " " + c + "\n");
-            if (!selfGrid.isValidPos(temp, r,c)) { //not valid Pos
-                status.append("Invalid Position\n");
-                return;
-            }
-            selfGrid.setShip(temp, r, c);
-            placedShipNum++;
-            updateSelfBoard();
+        if (!player.getSelfGrid().isValidPos(temp, x,y)) { //not valid Pos
+            status.append("Invalid Position\n");
+            return;
         }
-        else{
-            status.append("Invalid Input Range\n");
-        }
+        player.getSelfGrid().setShip(temp, x, y);
+        placedShipNum++;
+        updateSelfBoard();
+
         handleInitShipPlacement();
+
     }
     private void handleOnAttack(){
-
-        //TODO:
-        // Attack GUI interaction.System.out.println("Attack clicked");
-    }
-    //------------Networking------------//
-    private void handleConnectServer(){
-        //TODO: GameInit
-        System.out.println("Connect clicked");
-        try{
-            socket = new Socket("localhost", 1216);
-            status.append("Success: Server connected.\n");
-            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-            objectInputStream = new ObjectInputStream(socket.getInputStream());
+        System.out.println("Attack clicked");
+        int x = -1; // 0-9 representation on Grid
+        int y = -1;
+        try{//check if integer
+            x = Integer.parseInt(attackRowValue.getText().trim())-1;//entry value-1 = grid
+            y = Integer.parseInt(attackColValue.getText().trim())-1;
+            attackRowValue.setText("");
+            attackColValue.setText("");
+        }
+        catch (Exception e){
+            status.append("Invalid Input.\n");
+            return;
+        }
+        //if not in range
+        if (x < 0 || x > 9 || y < 0 || y > 9){
+            status.append("Invalid Input Range.\n");
+            return;
+        }
+        // if target cell is explored
+        if (player.getGridStatusAt(x, y) != 1 || player.getGridStatusAt(x, y) == 1 ){
+            status.append("Invalid attack position ("+ (x+1) +", " +(y+1)+ "): Already explored.\n");
+            return;
+        }
+        //set actionX/Y using takeX/Y
+        status.append("Attacking enemy grid at (" + (x+1) +", " +(y+1)+")...\n");
+        player.takeX(x);
+        player.takeY(y);
+        try{//assume objectOutputStream is not null
+            objectOutputStream.writeObject(player);
         }
         catch(IOException e){
             e.printStackTrace();
-            status.append("Failed: Server not connected. \n");
+            status.append("Error Sending data to server...");
             return;
         }
+        //After a successful attack,
+        //disable button until updated Player object gets sent over and re-enable at that time
+        attackBtn.setEnabled(false);
+    }
+    //------------Networking------------//
+    private void handleConnectServer(){
+        System.out.println("Connect clicked");
+        if (placedShipNum !=5 ){
+            status.append("~ Ships not yet finished placing.\n");
+            return;
+        }
+        if (socket != null){
+            status.append("~ Server already connected.");
+            return;
+        }
+        player.replaceShipLstWith(shipLst);
         try{
-            //TODO: pass local Grid and shipLst.
-            objectOutputStream.writeObject(selfGrid);
-
+            socket = new Socket("localhost", 1216);
+            status.append("~ Success: Server connected.\n");
+            objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            objectInputStream = new ObjectInputStream(socket.getInputStream());
+            //TODO: the listening thread starts here after successful connection.
+            new Thread(this).start();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+            status.append("Failed: Server not connected. Make sure server is running\n");
+            return;
+        }
+        try{//Send player with ready Grid and shipLst.
+            objectOutputStream.writeObject(player);
         }
         catch (IOException e){
-            status.append("Error\n");
+            status.append("Error sending game init\n");
         }
     }
 
+    public void replacePlayerObj(Player p){
+        //Overwrite whole player object
+        attackBtn.setEnabled(p.isAbleToMove());
+        updateSelfBoard();
+        updateOppoBoard();
+        player = p;
+    }
     @Override
     public void run() {
         while(true){
-            //TODO: constantly listening to server message;
+            try {
+                //TODO: confirm readObject blocks the operation.
+                Player temp = (Player) objectInputStream.readObject();
+                attackBtn.setEnabled(temp.isAbleToMove());
 
-
+                replacePlayerObj(temp);
+            }
+            catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public static void main(String[] args){
-        Client c = new Client(); // Threading start in constructor.
+        Client c = new Client(); // Threading start after Connect in the menu is hit.
     }
 
 
