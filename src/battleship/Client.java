@@ -10,7 +10,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class Client extends JFrame implements Runnable{
-
     //GUIs
     private static int WIDTH = 1440;
     private static int HEIGHT = 800;
@@ -27,16 +26,16 @@ public class Client extends JFrame implements Runnable{
     private JTextField placeColValue =new JTextField();
     private JTextField attackRowValue =new JTextField();
     private JTextField attackColValue =new JTextField();
+    private JButton placeBtn;
+    private JButton attackBtn;
     private JCheckBox isHorizontal = new JCheckBox("Is Horizontal? ");
-    //Hold reference of BoardCells(GUI) to change color
-    private ArrayList<BoardCell> selfBoardCells = new ArrayList<BoardCell>();
+    private ArrayList<BoardCell> selfBoardCells = new ArrayList<BoardCell>();//Hold reference of BoardCells(GUI) to change color
     private ArrayList<BoardCell> oppoBoardCells = new ArrayList<BoardCell>();
-
+    //Game Data
     private Grid selfGrid = new Grid();
     private Ship[] shipLst = new Ship[5];
-    //private int[][] oppoData = new int[10][10];
+    private Grid oppoGrid = new Grid();
     private int placedShipNum = -1;
-
     //Networking
     private Socket socket = null;
     ObjectOutputStream objectOutputStream = null;
@@ -50,8 +49,6 @@ public class Client extends JFrame implements Runnable{
                 "~ Then, click Connect to play with others.\n");
     }
     //------------GUIs------------//
-    //TODO:
-    // Attack GUI interaction.
     private void initGUI(){
         //create menu
         JMenuBar menuBar = new JMenuBar();
@@ -168,8 +165,9 @@ public class Client extends JFrame implements Runnable{
         placeCoord.add(isHorizontal);
         placeControl.add(placeCoord, BorderLayout.NORTH);
 
-        JButton placeBtn = new JButton("Place");
+        placeBtn = new JButton("Place");
         placeBtn.addActionListener((e)->handleOnPlace());
+        placeBtn.setEnabled(false);
         placeControl.add(placeBtn, BorderLayout.SOUTH);
 
         //---------------------------------------
@@ -189,8 +187,9 @@ public class Client extends JFrame implements Runnable{
         attackCoord.add(attackY);
         attackControl.add(attackCoord, BorderLayout.CENTER);
 
-        JButton attackBtn = new JButton("Attack");
+        attackBtn = new JButton("Attack");
         attackBtn.addActionListener((e)->handleOnAttack());
+        attackBtn.setEnabled(false);
         attackControl.add(attackBtn, BorderLayout.SOUTH);
     }
     private void updateSelfBoard(){
@@ -215,6 +214,7 @@ public class Client extends JFrame implements Runnable{
 //    }
     private void handleInitShipPlacement(){
     if (placedShipNum == -1){ placedShipNum = 0;}
+    placeBtn.setEnabled(true);
     if(placedShipNum == 0){
         status.append("~ Place your length 2 ship\n");
         shipLst[placedShipNum] = new Ship(placedShipNum, 2);
@@ -236,18 +236,11 @@ public class Client extends JFrame implements Runnable{
         shipLst[placedShipNum] = new Ship(placedShipNum, 5);
     }
     else if(placedShipNum == 5){
-        status.append("~ All Ship Placed, you may click Connect! \n");
+        status.append("~ All Ship placed, you may connect! \n");
+        placeBtn.setEnabled(false);
     }
 }
     private void handleOnPlace(){
-        if(placedShipNum == 5){
-            status.append("All ships placed\n");
-            return;
-        }
-        else if(placedShipNum == -1){
-            status.append("Please start placing ship by click Play in the menubar\n");
-            return;
-        }
         int r = -1;
         int c = -1;
         boolean isH = isHorizontal.isSelected();;
@@ -268,7 +261,7 @@ public class Client extends JFrame implements Runnable{
             temp.setY(c);
             status.append("Placing shipId "+placedShipNum+" at "+ r + " " + c + "\n");
             if (!selfGrid.isValidPos(temp, r,c)) { //not valid Pos
-                status.append("Invalid Pos\n");
+                status.append("Invalid Position\n");
                 return;
             }
             selfGrid.setShip(temp, r, c);
@@ -281,10 +274,11 @@ public class Client extends JFrame implements Runnable{
         handleInitShipPlacement();
     }
     private void handleOnAttack(){
-        System.out.println("Attack clicked");
+
+        //TODO:
+        // Attack GUI interaction.System.out.println("Attack clicked");
     }
     //------------Networking------------//
-
     private void handleConnectServer(){
         //TODO: GameInit
         System.out.println("Connect clicked");
@@ -293,7 +287,6 @@ public class Client extends JFrame implements Runnable{
             status.append("Success: Server connected.\n");
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectInputStream = new ObjectInputStream(socket.getInputStream());
-
         }
         catch(IOException e){
             e.printStackTrace();

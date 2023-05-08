@@ -9,9 +9,17 @@ public class GameLogic {
     Player p2 = new Player(2);
 
     boolean isP1Move = true;
-    public GameLogic(){
-        
+
+    public Player getPlayerWithId(int id){
+        if(id == 1){
+            return p1;
+        }
+        else if(id ==2 ){
+            return p2;
+        }
+        return null;
     }
+
 
     public void initGame(){
         System.out.println("==========start=============\n");
