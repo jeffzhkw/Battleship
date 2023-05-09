@@ -99,6 +99,7 @@ public class Player implements  Serializable {
         // users are only allowed to fire at ocean (0 or 1) 
         if (status == 0) {
             status = self.setMiss(x, y);
+            // -1
         }
         else if (status == 1) {
 
@@ -106,25 +107,28 @@ public class Player implements  Serializable {
             int shipid = self.whichShip(x, y);
             shipLst[shipid].takeHit();
             status = self.setHit(x, y);
+            System.out.println(shipid + " => " + status);
             // check sunk ?
             // sink => status = 3;
             if (shipLst[shipid].getLife() == 0) {
                 life -= 1;
+                // turn current to status 3
+                self.setSunk(x, y);
                 return 3; // sunk
             }
-        }
-        else {
-            return status;
         }
         return status;
     }
 
     public boolean updateOppoView(int x, int y, int status) {
-        if (status == 1) {
+        if (status == -1) {
             oppo.setMiss(x, y);
         }
         else if (status == 2) {
             oppo.setHit(x, y);
+        }
+        else if (status == 3) {
+            oppo.setSunk(x, y);
         }
         return true;
     }

@@ -294,7 +294,7 @@ public class Client extends JFrame implements Runnable{
             return;
         }
         // if target cell is explored
-        if (player.getGridStatusAt(x, y) != 1 || player.getGridStatusAt(x, y) == 1 ){
+        if (player.getGridStatusAt(x, y) == -1 || player.getGridStatusAt(x, y) == 2){
             status.append("Invalid attack position ("+ (x+1) +", " +(y+1)+ "): Already explored.\n");
             return;
         }
@@ -359,7 +359,11 @@ public class Client extends JFrame implements Runnable{
         while(true){
             try {
                 //TODO: confirm readObject blocks the operation.
+                System.out.println("run");
                 Player temp = (Player) objectInputStream.readObject();
+                System.out.println(temp.getId());
+                System.out.println(temp.isAbleToMove());
+                temp.displayBoard();
                 attackBtn.setEnabled(temp.isAbleToMove());
 
                 replacePlayerObj(temp);
