@@ -3,6 +3,7 @@ package battleship;
 import battleship.Grid;
 import battleship.Ship;
 import java.io.Serializable;
+
 public class Player implements  Serializable {
     private static final long serialVersionUID = 1L;
     private int id;
