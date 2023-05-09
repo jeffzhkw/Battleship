@@ -7,8 +7,8 @@ public class Player implements  Serializable {
     private static final long serialVersionUID = 1L;
     private int id;
     private int life;
-    private Grid self = new Grid(); // actual
-    private Grid oppo = new Grid(); // view
+    public Grid self = new Grid(); // actual
+    public Grid oppo = new Grid(); // view
     private Ship[] shipLst = new Ship[5];
     private int actionX;
     private int actionY;
@@ -114,7 +114,7 @@ public class Player implements  Serializable {
                 life -= 1;
                 // turn current to status 3
                 self.setSunk(x, y);
-                return 3; // sunk
+                return self.setSunk(x, y);
             }
         }
         return status;
@@ -127,9 +127,11 @@ public class Player implements  Serializable {
         else if (status == 2) {
             oppo.setHit(x, y);
         }
-        else if (status == 3) {
-            oppo.setSunk(x, y);
-        }
+        return true;
+    }
+
+    public boolean updateOppoSunk(Cell[][] oppoBoard, int id) {
+        oppo.setOppoSunk(oppoBoard, id);
         return true;
     }
 

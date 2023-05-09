@@ -84,7 +84,7 @@ public class Server extends JFrame implements Runnable{
                 player1.self.setAbleToMove(isPlayer1AbleToMove);
                 player1.outputToClient.writeObject(player1.self);
                 player2.self.setAbleToMove(!isPlayer1AbleToMove);
-                System.out.println(player2.self.isAbleToMove());
+                System.out.println("p2move"+player2.self.isAbleToMove());
                 player2.outputToClient.writeObject(player2.self);
                 System.out.println("sent");
                 if (isPlayer1AbleToMove) {
@@ -93,8 +93,10 @@ public class Server extends JFrame implements Runnable{
                         // wait for currentplayer to intput
                         int x = player1.self.getX();
                         int y = player1.self.getY();
-                        System.out.println(x + ", " + y);
+                        //System.out.println(x + ", " + y);
                         if (x < 0 || y < 0) {
+                            player1.outputToClient.writeObject(player1.self);
+                            player2.outputToClient.writeObject(player2.self);
                             continue;
                         }
                         //System.out.println("hi");
@@ -102,12 +104,23 @@ public class Server extends JFrame implements Runnable{
                         //}
                         int status = player2.self.updateSelfByOppoMove(x, y);
                         // when miss or one ship sinks switch the turn
-                        System.out.println(status);
-                        player1.self.updateOppoView(x, y, status);
+                        System.out.println("stat" + status);
+                        System.out.println("id"+player2.self.self.state[x][y].getShipid());
+                        if (status != 3) {
+                            player1.self.updateOppoView(x, y, status);
+                        }
+                        else {
+                            player1.self.updateOppoSunk(player2.self.self.state, player2.self.self.state[x][y].getShipid());
+                        }
                         //player1.self.takeX(-1);
                         //player1.self.takeY(-1);
                         if (status == -1 || status == 3) {
                             isPlayer1AbleToMove = !isPlayer1AbleToMove;
+                            player1.self.setAbleToMove(isPlayer1AbleToMove);
+                            player2.self.setAbleToMove(!isPlayer1AbleToMove);
+                            System.out.println(player2.self.isAbleToMove());
+                            player1.outputToClient.writeObject(player1.self);
+                            player2.outputToClient.writeObject(player2.self);
                             break;
                         }
 
@@ -124,22 +137,40 @@ public class Server extends JFrame implements Runnable{
                         // wait for currentplayer to intput
                         int x = player2.self.getX();
                         int y = player2.self.getY();
+                        //System.out.println(x + ", " + y);
                         if (x < 0 || y < 0) {
+                            player1.outputToClient.writeObject(player1.self);
+                            player2.outputToClient.writeObject(player2.self);
                             continue;
                         }
-                        //System.out.println(x + ", " + y);
+                        //System.out.println("hi");
                         //break;
                         //}
                         int status = player1.self.updateSelfByOppoMove(x, y);
-                        player2.self.updateOppoView(x, y, status);
                         // when miss or one ship sinks switch the turn
-                        //player2.self.takeX(-1);
-                        //player2.self.takeY(-1);
+                        System.out.println("stat" + status);
+                        System.out.println("id"+player1.self.self.state[x][y].getShipid());
+                        if (status != 3) {
+                            player2.self.updateOppoView(x, y, status);
+                        }
+                        else {
+                            player2.self.updateOppoSunk(player1.self.self.state, player1.self.self.state[x][y].getShipid());
+                        }
+                        //player1.self.takeX(-1);
+                        //player1.self.takeY(-1);
                         if (status == -1 || status == 3) {
                             isPlayer1AbleToMove = !isPlayer1AbleToMove;
+                            player1.self.setAbleToMove(isPlayer1AbleToMove);
+                            player2.self.setAbleToMove(!isPlayer1AbleToMove);
+                            System.out.println(player2.self.isAbleToMove());
+                            player1.outputToClient.writeObject(player1.self);
+                            player2.outputToClient.writeObject(player2.self);
                             break;
                         }
 
+                        //player1.self.displayBoard();
+                        //System.out.println("P2===============");
+                        //player2.self.displayBoard();
                         player1.outputToClient.writeObject(player1.self);
                         player2.outputToClient.writeObject(player2.self);
                     }
@@ -183,8 +214,8 @@ public class Server extends JFrame implements Runnable{
                         }
                         System.out.println(self.getId());
                         self.printShipList();
-                        int x = player1.self.getX();
-                        int y = player1.self.getY();
+                        int x = self.getX();
+                        int y = self.getY();
                         //if (x != -1 && y != -1) {
                         System.out.println("get = " + x + ", " + y);
                         //outputToClient.writeObject(self);

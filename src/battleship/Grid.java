@@ -1,8 +1,8 @@
 package battleship;
 import java.io.Serializable;
 public class Grid implements Serializable{
-    private static final long serialVersionUID = 3;
-    private Cell[][] state = new Cell[10][10];
+    private static final long serialVersionUID = 3L;
+    public Cell[][] state = new Cell[10][10];
 
     public Grid(){
         for (int i = 0; i < 10; i ++) {
@@ -94,16 +94,30 @@ public class Grid implements Serializable{
 
     public int setHit(int x, int y) {
         state[x][y].setStatus(2);
-        //state[x][y].setShipid(-1);
         return 2;
     }
 
     public int setSunk(int x, int y) {
-        //state[x][y].setShipid(-1);
         int id = this.whichShip(x, y);
+        System.out.println("iddddddddd"+id);
+        System.out.println(id);
         for (int i = 0; i < 10; i ++) {
             for (int j = 0; j < 10; j ++) {
                 if (state[i][j].getShipid() != id) {
+                    //System.out.println(i + ", " + j  + ": " + state[i][j].getShipid());
+                    continue;
+                }
+                state[i][j].setStatus(3);
+            }
+        }
+        return 3;
+    }
+
+    public int setOppoSunk(Cell[][] board, int id) {
+        for (int i = 0; i < 10; i ++) {
+            for (int j = 0; j < 10; j ++) {
+                if (board[i][j].getShipid() != id) {
+                    //System.out.println(i + ", " + j  + ": " + state[i][j].getShipid());
                     continue;
                 }
                 state[i][j].setStatus(3);

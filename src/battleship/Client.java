@@ -281,6 +281,7 @@ public class Client extends JFrame implements Runnable{
         try{//check if integer
             x = Integer.parseInt(attackRowValue.getText().trim())-1;//entry value-1 = grid
             y = Integer.parseInt(attackColValue.getText().trim())-1;
+
             attackRowValue.setText("");
             attackColValue.setText("");
         }
@@ -303,6 +304,7 @@ public class Client extends JFrame implements Runnable{
         player.takeX(x);
         player.takeY(y);
         try{//assume objectOutputStream is not null
+            System.out.println(player.getX() + ", " + player.getY());
             objectOutputStream.writeObject(player);
         }
         catch(IOException e){
