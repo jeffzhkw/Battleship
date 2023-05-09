@@ -295,7 +295,7 @@ public class Client extends JFrame{
             return;
         }
         // if target cell is explored
-        if (player.getGridStatusAt(x, y) == -1 || player.getGridStatusAt(x, y) == 2){
+        if (player.getGridStatusAt(x, y) != 0 || player.getGridStatusAt(x, y) != -1){
             status.append("Invalid attack position ("+ (x+1) +", " +(y+1)+ "): Already explored.\n");
             return;
         }
@@ -360,7 +360,7 @@ public class Client extends JFrame{
             try {
                 //TODO: confirm readObject blocks the operation.
                 while(true){
-                    System.out.println("Client running: waiting server sending");
+                    System.out.println("Client running: waiting server to send");
                     Player temp = (Player) objectInputStream.readObject();
                     System.out.println(temp.getId());
                     System.out.println(temp.isAbleToMove());
