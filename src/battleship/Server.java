@@ -2,7 +2,7 @@ package battleship;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
@@ -50,13 +50,24 @@ public class Server extends JFrame implements Runnable{
                 Socket socket = serverSocket.accept();
                 if (player1 == null) { //The first connection would always be player1;
                     player1 = new ListenPlayer(socket, 1);
+                    System.out.println("create listenplayer1");
+                    new Thread(player1).start();
                 } else if (player1 != null && player2 == null) {
                     player2 = new ListenPlayer(socket, 2);
+                    System.out.println("create listenplayer2");
+                    new Thread(player2).start();
+                }
+                if (player1 != null && player1.self != null) {
+                    System.out.println("player1 ok");
+                    System.out.println(player1.self.getId());
                 }
             }
             System.out.println("Both Player Connected.");
             //Enters game init.
-            game.initGame();
+            //game.initGame();
+            while (true) {
+
+            }
         }
         catch(IOException e){
             System.err.println(e);
@@ -66,20 +77,37 @@ public class Server extends JFrame implements Runnable{
     class ListenPlayer implements Runnable{
         private Socket socket;
         private int id;
-        private Player self;
+        public Player self = null;
         public ListenPlayer(Socket s, int id){
             this.socket = s;
             this.id = id;
             console.append("Player" + this.id + "Connected.\n");
-            self = game.getPlayerWithId(id);
+            //self = game.getPlayerWithId(id);
         }
         @Override
         public void run() {
             //TODO: Constantly listen to client's action.
-            while(true){
-                //TODO: handle Player Object init
+            try {
+                ObjectInputStream inputFromClient = new ObjectInputStream(socket.getInputStream());
+                ObjectOutputStream outputToClient = new ObjectOutputStream(socket.getOutputStream());
 
+                while(true){
+                    try {
+                        //TODO: confirm readObject blocks the operation.
+                        self = (Player) inputFromClient.readObject();
+                        self.setId(id);
+                        System.out.println(self.getId());
+                        self.printShipList();
+                    }
+                    catch (IOException | ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
+            catch(IOException ex) {
+                ex.printStackTrace();
+            }
+
         }
     }
     public static void main(String[] args){

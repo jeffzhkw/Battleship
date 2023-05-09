@@ -1,5 +1,7 @@
 package battleship;
-public class Ship {
+import java.io.Serializable;
+public class Ship implements Serializable {
+    private static final long serialVersionUID = 5;
     private int shipid;
     private int length;
     private boolean isHorizontal;

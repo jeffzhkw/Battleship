@@ -2,8 +2,9 @@ package battleship;
 
 import battleship.Grid;
 import battleship.Ship;
-
-public class Player {
+import java.io.Serializable;
+public class Player implements  Serializable {
+    private static final long serialVersionUID = 1L;
     private int id;
     private int life;
     private Grid self = new Grid(); // actual
@@ -25,6 +26,11 @@ public class Player {
         ableToMove = false;
     }
 
+
+    public int setId(int id) {
+        this.id = id;
+        return id;
+    }
     public int getId() {
         return id;
     }
@@ -75,8 +81,16 @@ public class Player {
         return actionX;
     }
 
+    public int getX() {
+        return actionX;
+    }
+
     public int takeY(int y) {
         actionY = y;
+        return actionY;
+    }
+
+    public int getY() {
         return actionY;
     }
 
@@ -113,6 +127,12 @@ public class Player {
             oppo.setHit(x, y);
         }
         return true;
+    }
+
+    public void printShipList() {
+        for (int i = 0; i < 5; i ++) {
+            System.out.println("id: " + shipLst[i].getShipid() + ", x: " + shipLst[i].getX() + ", y : " + shipLst[i].getY() + " , length : " + shipLst[i].getLength());
+        }
     }
 
 }

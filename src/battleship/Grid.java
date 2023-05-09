@@ -1,6 +1,7 @@
 package battleship;
-
-public class Grid {
+import java.io.Serializable;
+public class Grid implements Serializable{
+    private static final long serialVersionUID = 3;
     private Cell[][] state = new Cell[10][10];
 
     public Grid(){
@@ -11,6 +12,7 @@ public class Grid {
             }
         }
     }
+
 
     // set for debugging purpose
     public void displayGrid() {
