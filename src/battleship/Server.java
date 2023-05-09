@@ -219,7 +219,9 @@ public class Server extends JFrame implements Runnable{
                         try{
                             Player p1 = Server.player1.self;
                             Player p2 = Server.player2.self;
+                            Server.player1.outputToClient.reset();
                             Server.player1.outputToClient.writeObject(p1);
+                            Server.player2.outputToClient.reset();
                             Server.player2.outputToClient.writeObject(p2);
                             p2.displayBoard();
                             Server.player1.dataOutputStream.writeUTF("p1 move: " + String.valueOf(Server.isPlayer1AbleToMove));
@@ -252,7 +254,9 @@ public class Server extends JFrame implements Runnable{
                         System.out.println("hi");
                         Player p1 = Server.player1.self;
                         Player p2 = Server.player2.self;
+                        Server.player1.outputToClient.reset();
                         Server.player1.outputToClient.writeObject(p1);
+                        Server.player2.outputToClient.reset();
                         Server.player2.outputToClient.writeObject(p2);
                         p2.displayBoard();
                         Server.player1.dataOutputStream.writeUTF("p1 move: " + String.valueOf(Server.isPlayer1AbleToMove));
@@ -274,7 +278,9 @@ public class Server extends JFrame implements Runnable{
                         try{
                             Player p1 = Server.player1.self;
                             Player p2 = Server.player2.self;
+                            Server.player1.outputToClient.reset();
                             Server.player1.outputToClient.writeObject(p1);
+                            Server.player2.outputToClient.reset();
                             Server.player2.outputToClient.writeObject(p2);
                             p2.displayBoard();
                             Server.player1.dataOutputStream.writeUTF("p1 move: " + String.valueOf(Server.isPlayer1AbleToMove));
@@ -302,7 +308,9 @@ public class Server extends JFrame implements Runnable{
                     try{
                         Player p1 = Server.player1.self;
                         Player p2 = Server.player2.self;
+                        Server.player1.outputToClient.reset();
                         Server.player1.outputToClient.writeObject(p1);
+                        Server.player2.outputToClient.reset();
                         Server.player2.outputToClient.writeObject(p2);
                         p2.displayBoard();
                         Server.player1.dataOutputStream.writeUTF("p1 move: " + String.valueOf(Server.isPlayer1AbleToMove));
