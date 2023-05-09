@@ -1,10 +1,12 @@
 package battleship;
-public class Cell {
+import java.io.Serializable;
+public class Cell implements Serializable {
     // -1: miss
     // 0: unexplored: empty
     // 1: unexplored: there
     // 2: hit
     // 3: sink
+    private static final long serialVersionUID = 2;
     private int status;
 
     private int shipid; //valid id can only be 0, 1, 2, 3, 4

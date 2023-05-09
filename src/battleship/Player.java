@@ -2,8 +2,9 @@ package battleship;
 
 import battleship.Grid;
 import battleship.Ship;
-
-public class Player {
+import java.io.Serializable;
+public class Player implements  Serializable {
+    private static final long serialVersionUID = 1L;
     private int id;
     private int life;
     private Grid self = new Grid(); // actual
@@ -25,6 +26,11 @@ public class Player {
         ableToMove = false;
     }
 
+
+    public int setId(int id) {
+        this.id = id;
+        return id;
+    }
     public int getId() {
         return id;
     }
@@ -75,8 +81,16 @@ public class Player {
         return actionX;
     }
 
+    public int getX() {
+        return actionX;
+    }
+
     public int takeY(int y) {
         actionY = y;
+        return actionY;
+    }
+
+    public int getY() {
         return actionY;
     }
 
@@ -85,6 +99,7 @@ public class Player {
         // users are only allowed to fire at ocean (0 or 1) 
         if (status == 0) {
             status = self.setMiss(x, y);
+            // -1
         }
         else if (status == 1) {
 
@@ -92,27 +107,36 @@ public class Player {
             int shipid = self.whichShip(x, y);
             shipLst[shipid].takeHit();
             status = self.setHit(x, y);
+            System.out.println(shipid + " => " + status);
             // check sunk ?
             // sink => status = 3;
             if (shipLst[shipid].getLife() == 0) {
                 life -= 1;
+                // turn current to status 3
+                self.setSunk(x, y);
                 return 3; // sunk
             }
-        }
-        else {
-            return status;
         }
         return status;
     }
 
     public boolean updateOppoView(int x, int y, int status) {
-        if (status == 1) {
+        if (status == -1) {
             oppo.setMiss(x, y);
         }
         else if (status == 2) {
             oppo.setHit(x, y);
         }
+        else if (status == 3) {
+            oppo.setSunk(x, y);
+        }
         return true;
+    }
+
+    public void printShipList() {
+        for (int i = 0; i < 5; i ++) {
+            System.out.println("id: " + shipLst[i].getShipid() + ", x: " + shipLst[i].getX() + ", y : " + shipLst[i].getY() + " , length : " + shipLst[i].getLength());
+        }
     }
 
 }

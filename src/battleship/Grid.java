@@ -1,6 +1,7 @@
 package battleship;
-
-public class Grid {
+import java.io.Serializable;
+public class Grid implements Serializable{
+    private static final long serialVersionUID = 3;
     private Cell[][] state = new Cell[10][10];
 
     public Grid(){
@@ -11,6 +12,7 @@ public class Grid {
             }
         }
     }
+
 
     // set for debugging purpose
     public void displayGrid() {
@@ -87,13 +89,27 @@ public class Grid {
     // only allow users to fire on cell where grid status = 0 or 1
     public int setMiss(int x, int y) {
         state[x][y].setStatus(-1); // miss
-        return 1;
+        return -1;
     }
 
     public int setHit(int x, int y) {
         state[x][y].setStatus(2);
-        state[x][y].setShipid(-1);
+        //state[x][y].setShipid(-1);
         return 2;
+    }
+
+    public int setSunk(int x, int y) {
+        //state[x][y].setShipid(-1);
+        int id = this.whichShip(x, y);
+        for (int i = 0; i < 10; i ++) {
+            for (int j = 0; j < 10; j ++) {
+                if (state[i][j].getShipid() != id) {
+                    continue;
+                }
+                state[i][j].setStatus(3);
+            }
+        }
+        return 3;
     }
 
     public int[][] getAllStatus(){
