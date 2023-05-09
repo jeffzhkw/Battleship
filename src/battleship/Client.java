@@ -5,10 +5,11 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class Client extends JFrame implements Runnable{
+public class Client extends JFrame{
     //GUIs
     private static int WIDTH = 1440;
     private static int HEIGHT = 800;
@@ -307,7 +308,7 @@ public class Client extends JFrame implements Runnable{
         }
         catch(IOException e){
             e.printStackTrace();
-            status.append("Error Sending data to server...");
+            status.append("Error Sending data to server...\n");
             return;
         }
         //After a successful attack,
@@ -331,8 +332,6 @@ public class Client extends JFrame implements Runnable{
             status.append("~ Success: Server connected.\n");
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectInputStream = new ObjectInputStream(socket.getInputStream());
-            //TODO: the listening thread starts here after successful connection.
-            new Thread(this).start();
         }
         catch(IOException e){
             e.printStackTrace();
@@ -340,40 +339,46 @@ public class Client extends JFrame implements Runnable{
             return;
         }
         try{//Send player with ready Grid and shipLst.
-            objectOutputStream.writeObject(player);
+            objectOutputStream.writeObject(player);//Might need to sleep for a while... make sure server ListenPlayer is ready
+            new Thread(new ListenServer(socket,objectOutputStream,objectInputStream)).start();
         }
         catch (IOException e){
+            e.printStackTrace();
             status.append("Error sending game init\n");
         }
     }
-
-    public void replacePlayerObj(Player p){
-        //Overwrite whole player object
-        attackBtn.setEnabled(p.isAbleToMove());
-        updateSelfBoard();
-        updateOppoBoard();
-        player = p;
-    }
-    @Override
-    public void run() {
-        while(true){
+    class ListenServer implements Runnable{
+        private Socket socket;
+        private ObjectOutputStream o;
+        private ObjectInputStream i;
+        ListenServer(Socket s, ObjectOutputStream o, ObjectInputStream i){
+            this.socket =s;
+            this.o = o;
+            this.i =i;
+        }
+        public void run(){
             try {
                 //TODO: confirm readObject blocks the operation.
-                System.out.println("run");
-                Player temp = (Player) objectInputStream.readObject();
-                System.out.println(temp.getId());
-                System.out.println(temp.isAbleToMove());
-                temp.displayBoard();
-                attackBtn.setEnabled(temp.isAbleToMove());
-
-                replacePlayerObj(temp);
+                while(true){
+                    System.out.println("Client running: waiting server sending");
+                    Player temp = (Player) objectInputStream.readObject();
+                    System.out.println(temp.getId());
+                    System.out.println(temp.isAbleToMove());
+                    temp.displayBoard();
+                    player = temp;
+                    javax.swing.SwingUtilities.invokeAndWait(() -> {
+                        attackBtn.setEnabled(player.isAbleToMove());
+                        updateSelfBoard();
+                        updateOppoBoard();
+                    });
+                }
             }
-            catch (IOException | ClassNotFoundException e) {
+            catch (IOException | ClassNotFoundException | InterruptedException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
         }
-    }
 
+    }
     public static void main(String[] args){
         Client c = new Client(); // Threading start after Connect in the menu is hit.
     }

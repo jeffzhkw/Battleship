@@ -36,10 +36,6 @@ public class Server extends JFrame implements Runnable{
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
     }
-    //TODO:
-    // 1. handle connections from 2 client using Sockets.
-    // 2. running game logic.
-    // 3. Define what needed to be send. Payload structure.
     @Override
     public void run() {
         try{
@@ -120,6 +116,7 @@ public class Server extends JFrame implements Runnable{
                 }
                 else {
                     System.out.println("in p2");
+                    //TODO: stuck here.
                     while (true) {
                         // wait for currentplayer to intput
                         int x = player2.self.getX();
