@@ -2,7 +2,6 @@ package battleship;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,7 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class Client extends JFrame{
+public class Client extends JFrame {
     //GUIs
     private static int WIDTH = 1440;
     private static int HEIGHT = 800;
@@ -41,7 +40,6 @@ public class Client extends JFrame{
     private ObjectOutputStream objectOutputStream = null;
     private ObjectInputStream objectInputStream = null;
 
-    private DataInputStream dataInputStream = null;
 
     public Client(){
         super("Battleship");
@@ -339,11 +337,6 @@ public class Client extends JFrame{
             status.append("~ Success: Server connected.\n");
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectInputStream = new ObjectInputStream(socket.getInputStream());
-
-            dataInputStream = new DataInputStream(socket.getInputStream());
-            //TODO: the listening thread starts here after successful connection.
-            new Thread(new ListenServer(socket, objectOutputStream, objectInputStream)).start();
-
         }
         catch(IOException e){
             e.printStackTrace();
@@ -373,7 +366,7 @@ public class Client extends JFrame{
                 //TODO: confirm readObject blocks the operation.
                 while(true){
                     System.out.println("Client running: waiting server to send");
-                    Player temp = (Player) objectInputStream.readObject();
+                    Player temp = (Player)objectInputStream.readObject();
                     System.out.println(temp.getId());
                     System.out.println(temp.isAbleToMove());
                     temp.displayBoard();
@@ -382,6 +375,10 @@ public class Client extends JFrame{
                         attackBtn.setEnabled(player.isAbleToMove());
                         updateSelfBoard();
                         updateOppoBoard();
+                        if (player.getMessage() != null) {
+                            status.append("~ Game Ending!");
+                            status.append(player.getMessage());
+                        }
                     });
                 }
             }
