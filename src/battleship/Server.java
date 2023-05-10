@@ -103,14 +103,10 @@ public class Server extends JFrame implements Runnable{
                     int y = Server.player1.self.getY();
                     if (x < 0 || y < 0) { // default, wait for valid input
                         try{
-                            Player p1 = Server.player1.self;
-                            Player p2 = Server.player2.self;
                             Server.player1.outputToClient.reset();
-                            Server.player1.outputToClient.writeObject(p1);
+                            Server.player1.outputToClient.writeObject(Server.player1.self);
                             Server.player2.outputToClient.reset();
-                            Server.player2.outputToClient.writeObject(p2);
-                            p2.displayBoard();
-
+                            Server.player2.outputToClient.writeObject(Server.player2.self);
                         }
                         catch (IOException e){
                             System.err.println(e);
@@ -134,14 +130,10 @@ public class Server extends JFrame implements Runnable{
                         Server.player2.self.setAbleToMove(!Server.isPlayer1AbleToMove);
                     }
                     try{
-                        System.out.println("hi");
-                        Player p1 = Server.player1.self;
-                        Player p2 = Server.player2.self;
                         Server.player1.outputToClient.reset();
-                        Server.player1.outputToClient.writeObject(p1);
+                        Server.player1.outputToClient.writeObject(Server.player1.self);
                         Server.player2.outputToClient.reset();
-                        Server.player2.outputToClient.writeObject(p2);
-                        p2.displayBoard();
+                        Server.player2.outputToClient.writeObject(Server.player2.self);
                     }
                     catch (IOException e){
                         System.err.println(e);
@@ -155,13 +147,10 @@ public class Server extends JFrame implements Runnable{
                     int y = Server.player2.self.getY();
                     if (x < 0 || y < 0) { // default, wait for actual input
                         try{
-                            Player p1 = Server.player1.self;
-                            Player p2 = Server.player2.self;
                             Server.player1.outputToClient.reset();
-                            Server.player1.outputToClient.writeObject(p1);
+                            Server.player1.outputToClient.writeObject(Server.player1.self);
                             Server.player2.outputToClient.reset();
-                            Server.player2.outputToClient.writeObject(p2);
-                            p2.displayBoard();
+                            Server.player2.outputToClient.writeObject(Server.player2.self);
                         }
                         catch (IOException e){
                             System.err.println(e);
@@ -182,19 +171,36 @@ public class Server extends JFrame implements Runnable{
                         Server.player2.self.setAbleToMove(!Server.isPlayer1AbleToMove);
                     }
                     try{
-                        Player p1 = Server.player1.self;
-                        Player p2 = Server.player2.self;
                         Server.player1.outputToClient.reset();
-                        Server.player1.outputToClient.writeObject(p1);
+                        Server.player1.outputToClient.writeObject(Server.player1.self);
                         Server.player2.outputToClient.reset();
-                        Server.player2.outputToClient.writeObject(p2);
-                        p2.displayBoard();
+                        Server.player2.outputToClient.writeObject(Server.player2.self);
                     }
                     catch (IOException e){
                         System.err.println(e);
                     }
             }
             if (Server.player1.self.getLife() == 0 || Server.player2.self.getLife() == 0) {
+                // disable buttons
+                Server.player1.self.setAbleToMove(false);
+                Server.player2.self.setAbleToMove(false);
+                if (Server.player1.self.getLife() == 0) {
+                    Server.player1.self.setMessage("You Loss!");
+                    Server.player2.self.setMessage("You Win!");
+                }
+                else {
+                    Server.player2.self.setMessage("You Loss!");
+                    Server.player1.self.setMessage("You Win!");
+                }
+                try{
+                    Server.player1.outputToClient.reset();
+                    Server.player1.outputToClient.writeObject(Server.player1.self);
+                    Server.player2.outputToClient.reset();
+                    Server.player2.outputToClient.writeObject(Server.player2.self);
+                }
+                catch (IOException e){
+                    System.err.println(e);
+                }
                 System.out.println("end");
             }
         }

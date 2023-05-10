@@ -9,7 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class Client extends JFrame{
+public class Client extends JFrame {
     //GUIs
     private static int WIDTH = 1440;
     private static int HEIGHT = 800;
@@ -298,7 +298,7 @@ public class Client extends JFrame{
         }
         // if target cell is explored
 
-        if (player.getGridStatusAt(x, y) != 0 && player.getGridStatusAt(x, y) != 1){
+        if (player.getOppoGridStatusAt(x, y) != 0 && player.getOppoGridStatusAt(x, y) != 1){
 
             status.append("Invalid attack position ("+ (x+1) +", " +(y+1)+ "): Already explored.\n");
             return;
@@ -337,9 +337,6 @@ public class Client extends JFrame{
             status.append("~ Success: Server connected.\n");
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectInputStream = new ObjectInputStream(socket.getInputStream());
-            //TODO: the listening thread starts here after successful connection.
-            new Thread(this).start();
-
         }
         catch(IOException e){
             e.printStackTrace();
@@ -367,24 +364,9 @@ public class Client extends JFrame{
         public void run(){
             try {
                 //TODO: confirm readObject blocks the operation.
-
-                System.out.println("run");
-                Player temp = (Player) objectInputStream.readObject();
-                player = temp;
-                System.out.println(temp.getId());
-                System.out.println(temp.isAbleToMove());
-                System.out.println(temp.getX() + " , " + temp.getY());
-                temp.displayBoard();
-                attackBtn.setEnabled(player.isAbleToMove());
-                updateSelfBoard();
-                updateOppoBoard();
-                //attackBtn.setEnabled(temp.isAbleToMove());
-
-                //replacePlayerObj(temp);
-                /*
                 while(true){
                     System.out.println("Client running: waiting server to send");
-                    Player temp = (Player) objectInputStream.readObject();
+                    Player temp = (Player)objectInputStream.readObject();
                     System.out.println(temp.getId());
                     System.out.println(temp.isAbleToMove());
                     temp.displayBoard();
@@ -393,9 +375,12 @@ public class Client extends JFrame{
                         attackBtn.setEnabled(player.isAbleToMove());
                         updateSelfBoard();
                         updateOppoBoard();
+                        if (player.getMessage() != null) {
+                            status.append("~ Game Ending!");
+                            status.append(player.getMessage());
+                        }
                     });
                 }
-                 */
             }
             catch (IOException | ClassNotFoundException | InterruptedException | InvocationTargetException e) {
                 throw new RuntimeException(e);
