@@ -2,7 +2,6 @@ package battleship;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -40,7 +39,6 @@ public class Client extends JFrame implements Runnable{
     private ObjectOutputStream objectOutputStream = null;
     private ObjectInputStream objectInputStream = null;
 
-    private DataInputStream dataInputStream = null;
 
     public Client(){
         super("Battleship");
@@ -336,7 +334,6 @@ public class Client extends JFrame implements Runnable{
             status.append("~ Success: Server connected.\n");
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectInputStream = new ObjectInputStream(socket.getInputStream());
-            dataInputStream = new DataInputStream(socket.getInputStream());
             //TODO: the listening thread starts here after successful connection.
             new Thread(this).start();
         }
@@ -372,14 +369,7 @@ public class Client extends JFrame implements Runnable{
                 System.out.println(temp.isAbleToMove());
                 System.out.println(temp.getX() + " , " + temp.getY());
                 temp.displayBoard();
-                String ret = dataInputStream.readUTF();
-                if (ret == null) {
-                    System.out.println("null");
-                }
-                else {
-                    System.out.println("not null");
-                    System.out.println(ret);
-                }
+
                 //attackBtn.setEnabled(temp.isAbleToMove());
 
                 replacePlayerObj(temp);
