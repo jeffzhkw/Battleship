@@ -1,7 +1,5 @@
 package battleship;
 
-import battleship.Grid;
-import battleship.Ship;
 import java.io.Serializable;
 
 public class Player implements  Serializable {
@@ -49,8 +47,12 @@ public class Player implements  Serializable {
     public boolean isAbleToMove(){return ableToMove;}
     public void setAbleToMove(boolean isAbleToMove){this.ableToMove = isAbleToMove;}
 
-    public int getGridStatusAt(int x, int y){
+    public int getSelfGridStatusAt(int x, int y){
         return self.getStatus(x, y);
+    }
+
+    public int getOppoGridStatusAt(int x, int y){
+        return oppo.getStatus(x, y);
     }
 
     public Grid getSelfGrid(){

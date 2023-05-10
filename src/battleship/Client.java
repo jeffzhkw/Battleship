@@ -300,7 +300,7 @@ public class Client extends JFrame{
         }
         // if target cell is explored
 
-        if (player.getGridStatusAt(x, y) != 0 && player.getGridStatusAt(x, y) != 1){
+        if (player.getOppoGridStatusAt(x, y) != 0 && player.getOppoGridStatusAt(x, y) != 1){
 
             status.append("Invalid attack position ("+ (x+1) +", " +(y+1)+ "): Already explored.\n");
             return;
@@ -342,7 +342,7 @@ public class Client extends JFrame{
 
             dataInputStream = new DataInputStream(socket.getInputStream());
             //TODO: the listening thread starts here after successful connection.
-            new Thread(this).start();
+            new Thread(new ListenServer(socket, objectOutputStream, objectInputStream)).start();
 
         }
         catch(IOException e){
@@ -371,26 +371,6 @@ public class Client extends JFrame{
         public void run(){
             try {
                 //TODO: confirm readObject blocks the operation.
-
-                System.out.println("run");
-                Player temp = (Player) objectInputStream.readObject();
-                player = temp;
-                System.out.println(temp.getId());
-                System.out.println(temp.isAbleToMove());
-                System.out.println(temp.getX() + " , " + temp.getY());
-                temp.displayBoard();
-                String ret = dataInputStream.readUTF();
-                if (ret == null) {
-                    System.out.println("null");
-                }
-                else {
-                    System.out.println("not null");
-                    System.out.println(ret);
-                }
-                //attackBtn.setEnabled(temp.isAbleToMove());
-
-                replacePlayerObj(temp);
-
                 while(true){
                     System.out.println("Client running: waiting server to send");
                     Player temp = (Player) objectInputStream.readObject();
