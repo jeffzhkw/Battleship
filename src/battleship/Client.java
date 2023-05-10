@@ -2,6 +2,7 @@ package battleship;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -39,6 +40,8 @@ public class Client extends JFrame{
     private Socket socket = null;
     private ObjectOutputStream objectOutputStream = null;
     private ObjectInputStream objectInputStream = null;
+
+    private DataInputStream dataInputStream = null;
 
     public Client(){
         super("Battleship");
@@ -282,6 +285,7 @@ public class Client extends JFrame{
         try{//check if integer
             x = Integer.parseInt(attackRowValue.getText().trim())-1;//entry value-1 = grid
             y = Integer.parseInt(attackColValue.getText().trim())-1;
+
             attackRowValue.setText("");
             attackColValue.setText("");
         }
@@ -295,7 +299,9 @@ public class Client extends JFrame{
             return;
         }
         // if target cell is explored
-        if (player.getGridStatusAt(x, y) != 0 || player.getGridStatusAt(x, y) != -1){
+
+        if (player.getGridStatusAt(x, y) != 0 && player.getGridStatusAt(x, y) != 1){
+
             status.append("Invalid attack position ("+ (x+1) +", " +(y+1)+ "): Already explored.\n");
             return;
         }
@@ -304,6 +310,7 @@ public class Client extends JFrame{
         player.takeX(x);
         player.takeY(y);
         try{//assume objectOutputStream is not null
+            System.out.println(player.getX() + ", " + player.getY());
             objectOutputStream.writeObject(player);
         }
         catch(IOException e){
@@ -332,6 +339,11 @@ public class Client extends JFrame{
             status.append("~ Success: Server connected.\n");
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectInputStream = new ObjectInputStream(socket.getInputStream());
+
+            dataInputStream = new DataInputStream(socket.getInputStream());
+            //TODO: the listening thread starts here after successful connection.
+            new Thread(this).start();
+
         }
         catch(IOException e){
             e.printStackTrace();
@@ -359,6 +371,26 @@ public class Client extends JFrame{
         public void run(){
             try {
                 //TODO: confirm readObject blocks the operation.
+
+                System.out.println("run");
+                Player temp = (Player) objectInputStream.readObject();
+                player = temp;
+                System.out.println(temp.getId());
+                System.out.println(temp.isAbleToMove());
+                System.out.println(temp.getX() + " , " + temp.getY());
+                temp.displayBoard();
+                String ret = dataInputStream.readUTF();
+                if (ret == null) {
+                    System.out.println("null");
+                }
+                else {
+                    System.out.println("not null");
+                    System.out.println(ret);
+                }
+                //attackBtn.setEnabled(temp.isAbleToMove());
+
+                replacePlayerObj(temp);
+
                 while(true){
                     System.out.println("Client running: waiting server to send");
                     Player temp = (Player) objectInputStream.readObject();

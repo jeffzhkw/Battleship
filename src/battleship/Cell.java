@@ -6,7 +6,7 @@ public class Cell implements Serializable {
     // 1: unexplored: there
     // 2: hit
     // 3: sink
-    private static final long serialVersionUID = 2;
+    private static final long serialVersionUID = 2L;
     private int status;
 
     private int shipid; //valid id can only be 0, 1, 2, 3, 4
