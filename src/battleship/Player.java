@@ -12,7 +12,7 @@ public class Player implements  Serializable {
     private int actionX;
     private int actionY;
     private boolean ableToMove;
-    private String endingmessage;
+    private String message;
 
     public Player(int id) {
         this.id = id;
@@ -146,11 +146,11 @@ public class Player implements  Serializable {
     }
 
     public void setMessage(String msg) {
-        this.endingmessage = msg;
+        this.message = msg;
     }
 
     public String getMessage() {
-        return this.endingmessage;
+        return this.message;
     }
 
 }

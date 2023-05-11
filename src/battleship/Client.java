@@ -288,19 +288,19 @@ public class Client extends JFrame {
             attackColValue.setText("");
         }
         catch (Exception e){
-            status.append("Invalid Input.\n");
+            status.append("~ Invalid Input.\n");
             return;
         }
         //if not in range
         if (x < 0 || x > 9 || y < 0 || y > 9){
-            status.append("Invalid Input Range.\n");
+            status.append("~ Invalid Input Range.\n");
             return;
         }
         // if target cell is explored
 
         if (player.getOppoGridStatusAt(x, y) != 0 && player.getOppoGridStatusAt(x, y) != 1){
 
-            status.append("Invalid attack position ("+ (x+1) +", " +(y+1)+ "): Already explored.\n");
+            status.append("~ Invalid attack position ("+ (x+1) +", " +(y+1)+ "): Already explored.\n");
             return;
         }
         //set actionX/Y using takeX/Y
@@ -313,7 +313,7 @@ public class Client extends JFrame {
         }
         catch(IOException e){
             e.printStackTrace();
-            status.append("Error Sending data to server...\n");
+            status.append("~ Error Sending data to server...\n");
             return;
         }
         //After a successful attack,
@@ -334,13 +334,13 @@ public class Client extends JFrame {
         player.replaceShipLstWith(shipLst);
         try{
             socket = new Socket("localhost", 1216);
-            status.append("~ Success: Server connected.\n");
+            status.append("~ Success: Server connected.\nGame will start when both player connected...\n");
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectInputStream = new ObjectInputStream(socket.getInputStream());
         }
         catch(IOException e){
             e.printStackTrace();
-            status.append("Failed: Server not connected. Make sure server is running\n");
+            status.append("~ Failed: Server not connected. Make sure server is running\n");
             return;
         }
         try{//Send player with ready Grid and shipLst.
@@ -349,7 +349,7 @@ public class Client extends JFrame {
         }
         catch (IOException e){
             e.printStackTrace();
-            status.append("Error sending game init\n");
+            status.append("~ Error sending game init\n");
         }
     }
     class ListenServer implements Runnable{
@@ -373,12 +373,20 @@ public class Client extends JFrame {
                     player = temp;
                     javax.swing.SwingUtilities.invokeAndWait(() -> {
                         attackBtn.setEnabled(player.isAbleToMove());
+                        if(player.isAbleToMove()&&player.getLife() != 0){
+                            status.append("~ Your Move! \n");
+                        }
+                        else{
+                            status.append("~ Enemy Move...\n");
+                        }
+
                         updateSelfBoard();
                         updateOppoBoard();
                         if (player.getMessage() != null) {
-                            status.append("~ Game Ending!");
                             status.append(player.getMessage());
+                            player.setMessage("");
                         }
+                        status.setCaretPosition(status.getDocument().getLength());
                     });
                 }
             }
